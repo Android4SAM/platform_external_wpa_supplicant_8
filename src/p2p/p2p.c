@@ -1229,7 +1229,11 @@ void p2p_add_dev_info(struct p2p_data *p2p, const u8 *addr,
 				msg->listen_channel[2],
 				msg->listen_channel[3],
 				msg->listen_channel[4]);
+#if defined(RTL_USB_WIFI_USED)
+		} else if(dev->listen_freq != freq){
+#else
 		} else {
+#endif
 			wpa_msg(p2p->cfg->msg_ctx, MSG_DEBUG, "P2P: Update "
 				"peer " MACSTR " Listen channel: %u -> %u MHz",
 				MAC2STR(dev->info.p2p_device_addr),

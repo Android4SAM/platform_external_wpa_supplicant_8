@@ -6401,9 +6401,46 @@ static int wpa_driver_nl80211_probe_req_report(void *priv, int report)
 
 #if defined(CONFIG_P2P) && defined(KERNEL_2_6_35_PATCH)
 
-	//nothing to do now
+	//register mgmt frames, but ignore error for linux kernel version below 2.6.35
+	nl80211_register_frame(drv, drv->nl_handle_preq,
+				   (WLAN_FC_TYPE_MGMT << 2) |
+				   (WLAN_FC_STYPE_PROBE_REQ << 4),
+				   NULL, 0);
+
+#ifdef ANDROID_BRCM_P2P_PATCH
+	if (drv->nlmode != NL80211_IFTYPE_AP &&
+		drv->nlmode != NL80211_IFTYPE_P2P_GO) {
+		wpa_printf(MSG_DEBUG, "nl80211: probe_req_report control only "
+			   "allowed in AP or P2P GO mode (iftype=%d)",
+			   drv->nlmode);
+		goto done;
+	}
 	
+	nl80211_register_frame(drv, drv->nl_handle_preq,
+			   (WLAN_FC_TYPE_MGMT << 2) |
+			   (WLAN_FC_STYPE_ASSOC_REQ << 4),
+			   NULL, 0);
+
+	nl80211_register_frame(drv, drv->nl_handle_preq,
+			   (WLAN_FC_TYPE_MGMT << 2) |
+			   (WLAN_FC_STYPE_REASSOC_REQ << 4),
+			   NULL, 0);
+
+	nl80211_register_frame(drv, drv->nl_handle_preq,
+			   (WLAN_FC_TYPE_MGMT << 2) |
+			   (WLAN_FC_STYPE_DISASSOC << 4),
+			   NULL, 0);
+
+	nl80211_register_frame(drv, drv->nl_handle_preq,
+					   (WLAN_FC_TYPE_MGMT << 2) |
+					   (WLAN_FC_STYPE_DEAUTH << 4),
+					   NULL, 0);
+	
+done:
+#endif //ANDROID_BRCM_P2P_PATCH
+
 #else //defined(CONFIG_P2P) && defined(KERNEL_2_6_35_PATCH)
+
 	if (nl80211_register_frame(drv, drv->nl_handle_preq,
 				   (WLAN_FC_TYPE_MGMT << 2) |
 				   (WLAN_FC_STYPE_PROBE_REQ << 4),
