@@ -127,7 +127,7 @@ void p2p_process_invitation_req(struct p2p_data *p2p, const u8 *sa,
 
 	dev = p2p_get_device(p2p, sa);
 	if (dev == NULL || (dev->flags & P2P_DEV_PROBE_REQ_ONLY)) {
-		wpa_msg(p2p->cfg->msg_ctx, MSG_DEBUG,
+		wpa_msg(p2p->cfg->msg_ctx, MSG_INFO,
 			"P2P: Invitation Request from unknown peer "
 			MACSTR, MAC2STR(sa));
 
