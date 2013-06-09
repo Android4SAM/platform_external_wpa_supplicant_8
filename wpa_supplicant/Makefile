@@ -10,8 +10,18 @@ export LIBDIR ?= /usr/local/lib/
 export BINDIR ?= /usr/local/sbin/
 PKG_CONFIG ?= pkg-config
 
+PURE_LINUX = y
+ifeq ($(PURE_LINUX), y)
+CFLAGS += -DPURE_LINUX
+endif
+
+CFLAGS += -I.
 CFLAGS += -I../src
 CFLAGS += -I../src/utils
+CFLAGS += -I../src/drivers
+
+CFLAGS += -DANDROID -DANDROID_P2P -DREALTEK_WIFI_VENDOR
+
 
 -include .config
 
@@ -22,13 +32,14 @@ BINALL += wpa_passphrase
 endif
 
 ALL = $(BINALL)
+ifneq ($(PURE_LINUX), y)
 ALL += systemd/wpa_supplicant.service
 ALL += systemd/wpa_supplicant@.service
 ALL += systemd/wpa_supplicant-nl80211@.service
 ALL += systemd/wpa_supplicant-wired@.service
 ALL += dbus/fi.epitest.hostap.WPASupplicant.service
 ALL += dbus/fi.w1.wpa_supplicant1.service
-
+endif
 
 all: verify_config $(ALL) dynamic_eap_methods
 
@@ -234,6 +245,11 @@ CONFIG_WPS=y
 CONFIG_AP=y
 ifdef CONFIG_P2P_STRICT
 CFLAGS += -DCONFIG_P2P_STRICT
+endif
+ifdef CONFIG_WFD
+ifndef CONFIG_WIFI_DISPLAY
+CFLAGS += -DCONFIG_WFD
+endif
 endif
 endif
 

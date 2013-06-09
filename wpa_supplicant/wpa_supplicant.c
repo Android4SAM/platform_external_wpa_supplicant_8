@@ -2605,6 +2605,28 @@ void wpa_supplicant_apply_ht_overrides(
 
 #endif /* CONFIG_HT_OVERRIDES */
 
+#ifdef CONFIG_WFD
+void wfd_set_config_info2driver( struct wpa_supplicant* wpa_s )
+{
+	char		buf[ 256 ];
+
+	wpa_printf(MSG_DEBUG, "WFD: Set config info to driver");
+
+	memset( buf, 0x00, 256 );
+	sprintf( buf, "%d", wpa_s->conf->wfd_tcpport );
+	wpa_drv_driver_cmd(wpa_s,  "WFD-SET-TCPPORT", buf, sizeof(buf));
+	
+	memset( buf, 0x00, 256 );
+	sprintf( buf, "%d", wpa_s->conf->wfd_max_throughput );
+	wpa_drv_driver_cmd(wpa_s,  "WFD-SET-MAXTPUT", buf, sizeof(buf));
+
+	memset( buf, 0x00, 256 );
+	sprintf( buf, "%d", wpa_s->conf->wfd_device_type );
+	wpa_drv_driver_cmd(wpa_s,  "WFD-SET-DEVTYPE", buf, sizeof(buf));
+
+}
+#endif // CONFIG_WFD
+
 
 static int pcsc_reader_init(struct wpa_supplicant *wpa_s)
 {
@@ -2899,6 +2921,9 @@ next_driver:
 	}
 #endif /* CONFIG_P2P */
 
+#ifdef CONFIG_WFD
+	wfd_set_config_info2driver( wpa_s );
+#endif
 	if (wpa_bss_init(wpa_s) < 0)
 		return -1;
 

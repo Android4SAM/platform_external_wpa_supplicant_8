@@ -705,6 +705,13 @@ int p2p_add_device(struct p2p_data *p2p, const u8 *addr, int freq, int level,
 			freq, msg.ds_params ? *msg.ds_params : -1);
 	}
 	if (scan_res) {
+#ifdef REALTEK_WIFI_VENDOR
+		if((freq != 2412) && (freq != 2437) && (freq != 2462))
+		{	
+			wpa_printf(MSG_INFO, "%s, freq(%d) is not 1,6,11, don't update to listen_freq", __func__, freq);
+		}	
+		wpa_printf(MSG_INFO, "%s, freq -> listen_freq=%d", __func__, freq);
+#endif
 		dev->listen_freq = freq;
 		if (msg.group_info)
 			dev->oper_freq = freq;
@@ -732,6 +739,12 @@ int p2p_add_device(struct p2p_data *p2p, const u8 *addr, int freq, int level,
 		dev->info.wfd_subelems = wpabuf_dup(msg.wfd_subelems);
 	}
 
+#ifdef CONFIG_WFD
+	dev->info.wfd_enable = msg.wfd_enable;
+	dev->info.session_avail = msg.session_avail;
+	dev->info.rtsp_ctrlport = msg.rtsp_ctrlport;
+	dev->info.wfd_device_type = msg.wfd_device_type;
+#endif //CONFIG_WFD
 	if (scan_res) {
 		p2p_add_group_clients(p2p, p2p_dev_addr, addr, freq,
 				      msg.group_info, msg.group_info_len);
@@ -1949,6 +1962,10 @@ struct wpabuf * p2p_build_probe_resp_ies(struct p2p_data *p2p)
 	p2p_buf_add_device_info(buf, p2p, NULL);
 	p2p_buf_update_ie_hdr(buf, len);
 
+#ifdef CONFIG_WFD
+	/* WFD IE */
+	p2p_buf_add_wfd_ie(buf);
+#endif
 	return buf;
 }
 
@@ -2201,7 +2218,10 @@ static int p2p_assoc_req_ie_wlan_ap(struct p2p_data *p2p, const u8 *bssid,
 	    (p2p->dev_capab & P2P_DEV_CAPAB_INFRA_MANAGED))
 		p2p_buf_add_p2p_interface(tmp, p2p);
 	p2p_buf_update_ie_hdr(tmp, lpos);
-
+#ifdef CONFIG_WFD
+	/* WFD IE */
+	p2p_buf_add_wfd_ie(tmp);
+#endif
 	tmplen = wpabuf_len(tmp);
 	if (tmplen > len)
 		res = -1;
@@ -2888,6 +2908,10 @@ void p2p_scan_ie(struct p2p_data *p2p, struct wpabuf *ies, const u8 *dev_id)
 					      p2p->ext_listen_interval);
 	/* TODO: p2p_buf_add_operating_channel() if GO */
 	p2p_buf_update_ie_hdr(ies, len);
+#ifdef CONFIG_WFD
+	/* WFD IE */
+	p2p_buf_add_wfd_ie(ies);
+#endif
 }
 
 
@@ -3685,7 +3709,10 @@ static struct wpabuf * p2p_build_presence_req(u32 duration1, u32 interval1,
 	len = p2p_buf_add_ie_hdr(req);
 	p2p_buf_add_noa(req, 0, 0, 0, ptr1, ptr2);
 	p2p_buf_update_ie_hdr(req, len);
-
+#ifdef CONFIG_WFD
+	/* WFD IE */
+	p2p_buf_add_wfd_ie(req);
+#endif
 	return req;
 }
 
@@ -3741,7 +3768,10 @@ static struct wpabuf * p2p_build_presence_resp(u8 status, const u8 *noa,
 	} else
 		p2p_buf_add_noa(resp, 0, 0, 0, NULL, NULL);
 	p2p_buf_update_ie_hdr(resp, len);
-
+#ifdef CONFIG_WFD
+	/* WFD IE */
+	p2p_buf_add_wfd_ie(resp);
+#endif
 	return resp;
 }
 

@@ -38,6 +38,11 @@ L_CFLAGS += -DANDROID_QCOM_WCN
 L_CFLAGS += -DANDROID_P2P
 endif
 
+ifeq ($(BOARD_WIFI_VENDOR), realtek)
+L_CFLAGS += -DREALTEK_WIFI_VENDOR
+L_CFLAGS += -DANDROID_P2P
+endif
+
 # Use Android specific directory for control interface sockets
 L_CFLAGS += -DCONFIG_CTRL_IFACE_CLIENT_DIR=\"/data/misc/wifi/sockets\"
 L_CFLAGS += -DCONFIG_CTRL_IFACE_DIR=\"/data/system/wpa_supplicant\"
@@ -251,6 +256,11 @@ CONFIG_WPS=y
 CONFIG_AP=y
 ifdef CONFIG_P2P_STRICT
 L_CFLAGS += -DCONFIG_P2P_STRICT
+endif
+ifdef CONFIG_WFD
+ifndef CONFIG_WIFI_DISPLAY
+L_CFLAGS += -DCONFIG_WFD
+endif
 endif
 endif
 

@@ -556,6 +556,13 @@ struct wpa_supplicant {
 	struct os_time p2p_auto_started;
 #endif /* CONFIG_P2P */
 
+#ifdef CONFIG_WFD
+	u8 wfd_enable;
+	u8 session_avail;
+	u16 rtsp_ctrlport;
+	u8 wfd_device_type;
+#endif //CONFIG_WFD
+
 	struct wpa_ssid *bgscan_ssid;
 	const struct bgscan_ops *bgscan;
 	void *bgscan_priv;

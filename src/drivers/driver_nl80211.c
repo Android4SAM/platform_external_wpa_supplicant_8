@@ -2520,11 +2520,18 @@ broken_combination:
 		}
 	}
 
+#ifndef REALTEK_WIFI_VENDOR
 	if (tb[NL80211_ATTR_OFFCHANNEL_TX_OK]) {
-		wpa_printf(MSG_DEBUG, "nl80211: Using driver-based "
+		wpa_printf(MSG_INFO, "nl80211: Using driver-based "
 			   "off-channel TX");
 		capa->flags |= WPA_DRIVER_FLAGS_OFFCHANNEL_TX;
 	}
+#endif
+
+#ifdef REALTEK_WIFI_VENDOR
+        wpa_printf(MSG_INFO, "nl80211: no Using driver-based "
+			   "off-channel TX");
+#endif
 
 	if (tb[NL80211_ATTR_ROAM_SUPPORT]) {
 		wpa_printf(MSG_DEBUG, "nl80211: Using driver-based roaming");
@@ -2575,8 +2582,9 @@ broken_combination:
 				WPA_DRIVER_FLAGS_TDLS_EXTERNAL_SETUP;
 		}
 	}
-
+#ifndef REALTEK_WIFI_VENDOR
 	if (tb[NL80211_ATTR_DEVICE_AP_SME])
+#endif
 		info->device_ap_sme = 1;
 
 	if (tb[NL80211_ATTR_FEATURE_FLAGS]) {
@@ -2672,7 +2680,7 @@ static int wpa_driver_nl80211_capa(struct wpa_driver_nl80211_data *drv)
 #ifdef ANDROID_P2P
 	if(drv->capa.flags & WPA_DRIVER_FLAGS_OFFCHANNEL_TX) {
 		/* Driver is new enough to support monitorless mode*/
-		wpa_printf(MSG_DEBUG, "nl80211: Driver is new "
+		wpa_printf(MSG_INFO, "nl80211: Driver is new "
 			  "enough to support monitor-less mode");
 		drv->use_monitor = 0;
 	}
@@ -2710,7 +2718,7 @@ static int wpa_driver_nl80211_capa(struct wpa_driver_nl80211_data *drv)
 }
 
 
-#ifdef ANDROID
+#if defined(ANDROID) && !defined(PURE_LINUX)
 static int android_genl_ctrl_resolve(struct nl_handle *handle,
 				     const char *name)
 {
