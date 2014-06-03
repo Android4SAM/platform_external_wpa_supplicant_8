@@ -118,6 +118,11 @@ static void p2p_expire_peers(struct p2p_data *p2p)
 			continue;
 #endif
 
+#ifdef REALTEK_WIFI_VENDOR
+		if (dev->req_config_methods != 0)
+			continue;
+#endif
+
 		p2p_dbg(p2p, "Expiring old peer entry " MACSTR,
 			MAC2STR(dev->info.p2p_device_addr));
 

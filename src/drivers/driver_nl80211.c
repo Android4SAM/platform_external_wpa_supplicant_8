@@ -3377,7 +3377,7 @@ static int wpa_driver_nl80211_capa(struct wpa_driver_nl80211_data *drv)
 }
 
 
-#ifdef ANDROID
+#if defined(ANDROID) && !defined(PURE_LINUX)
 static int android_genl_ctrl_resolve(struct nl_handle *handle,
 				     const char *name)
 {
@@ -3410,7 +3410,7 @@ fail:
 	return id;
 }
 #define genl_ctrl_resolve android_genl_ctrl_resolve
-#endif /* ANDROID */
+#endif /* defined(ANDROID) && !defined(PURE_LINUX) */
 
 
 static int wpa_driver_nl80211_init_nl_global(struct nl80211_global *global)
@@ -9861,6 +9861,9 @@ static int nl80211_set_param(void *priv, const char *param)
 		return 0;
 
 #ifdef CONFIG_P2P
+#ifndef CONFIG_IGNORE_P2P_GROUP_INTERFACE
+		// RTK doesn't support  "driver_param=use_p2p_group_interface=1" option, 
+		// ignore this setting and still use p2p0 as p2p interface.
 	if (os_strstr(param, "use_p2p_group_interface=1")) {
 		struct i802_bss *bss = priv;
 		struct wpa_driver_nl80211_data *drv = bss->drv;
@@ -9870,7 +9873,7 @@ static int nl80211_set_param(void *priv, const char *param)
 		drv->capa.flags |= WPA_DRIVER_FLAGS_P2P_CONCURRENT;
 		drv->capa.flags |= WPA_DRIVER_FLAGS_P2P_MGMT_AND_NON_P2P;
 	}
-
+#endif
 	if (os_strstr(param, "p2p_device=1")) {
 		struct i802_bss *bss = priv;
 		struct wpa_driver_nl80211_data *drv = bss->drv;
